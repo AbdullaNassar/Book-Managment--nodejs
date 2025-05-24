@@ -1,0 +1,9 @@
+Action                  http method         routes
+
+
+get all books           get                 /books
+add book                post                /books
+get bokk by id          get                 /:id
+delete book by id       delete              /:id
+edit book by id         patch               /:id
+
