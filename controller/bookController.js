@@ -1,5 +1,6 @@
 const express = require("express");
 const Book = require("../models/bookModel");
+const APIFeatures = require("../utils/apiFeatures");
 
 exports.getCheapest = function (req, res, next) {
   req.query.sort = "price";
@@ -10,41 +11,13 @@ exports.getCheapest = function (req, res, next) {
 
 exports.getAllBooks = async function (req, res) {
   try {
-    // filter
-    const queryObj = { ...req.query };
-    const excludeFields = ["page", "sort", "limit", "fields"];
-    excludeFields.forEach((el) => delete queryObj[el]);
-
-    //    advanced filter
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(
-      /\b(gte|gt|lte|lt|ne)\b/g,
-      (match) => `$${match}`
-    );
-    queryStr = JSON.parse(queryStr);
-    let query = Book.find(queryStr);
-
-    // fields (projection)
-    let fields = req.query.fields || "-__v";
-    fields = fields.split(",").join(" ");
-    query = query.select(fields);
-
-    // page
-    if (req.query.page) {
-      let page = +req.query.page;
-      let resPerPage = +req.query.limit || 2;
-      console.log(page, resPerPage);
-      query = query.limit(resPerPage).skip((page - 1) * resPerPage);
-    }
-
-    // sort
-    let sortBy = req.query.sort;
-    if (sortBy) sortBy.split(",").join(" ");
-    else sortBy = { createdAt: -1 };
-    query = query.sort(sortBy);
-
+    const features = new APIFeatures(Book.find(), req.query)
+      .filter()
+      .prjection()
+      .pagination()
+      .sorting();
     // execute the query
-    const data = await query;
+    const data = await features.query;
 
     // send response
     res.status(200).json({
