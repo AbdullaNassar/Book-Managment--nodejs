@@ -20,7 +20,6 @@ exports.getAllBooks = async function (req, res) {
     // fields (projection)
     let fields = req.query.fields || "-__v";
     fields = fields.split(",").join(" ");
-    console.log(fields, typeof fields);
     query = query.select(fields);
 
     // page
@@ -32,7 +31,9 @@ exports.getAllBooks = async function (req, res) {
     }
 
     // sort
-    const sortBy = req.query.sort.split(",").join(" ") || { createdAt: -1 };
+    let sortBy = req.query.sort;
+    if (sortBy) sortBy.split(",").join(" ");
+    else sortBy = { createdAt: -1 };
     query = query.sort(sortBy);
 
     // execute the query
@@ -46,7 +47,8 @@ exports.getAllBooks = async function (req, res) {
     });
   } catch (err) {
     console.log("errrrrr");
-    res.send(400).json({
+    console.log(err);
+    res.status(400).json({
       status: "failed",
       message: err,
     });
@@ -105,6 +107,7 @@ exports.editBook = async function (req, res) {
     });
   }
 };
+
 exports.deleteBook = async function (req, res) {
   const id = req.params.id;
   try {
