@@ -28,3 +28,5 @@ app.use("/books", bookRouter);
 app.listen(8000, () => {
   console.log("listening to the server... ");
 });
+
+// git commit -m "feat: add Book resource with full CRUD support" -m "- Created Book routes for all CRUD operations\n- Defined Book schema model using Mongoose\n- Added controller handlers for each book route\n- Connected to local MongoDB instance for database operations"

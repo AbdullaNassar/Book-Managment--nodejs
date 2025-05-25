@@ -25,6 +25,11 @@ const bookSchema = new mongoose.Schema({
       message: "availability must be (in stock) or (out of stock)",
     },
   },
+  createdAT: {
+    type: Date,
+    default: new Date().toISOString(),
+    select: false,
+  },
 });
 
 const Book = mongoose.model("Book", bookSchema);

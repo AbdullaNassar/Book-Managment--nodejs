@@ -3,7 +3,42 @@ const Book = require("../models/bookModel");
 
 exports.getAllBooks = async function (req, res) {
   try {
-    const data = await Book.find();
+    // filter
+    const queryObj = { ...req.query };
+    const excludeFields = ["page", "sort", "limit", "fields"];
+    excludeFields.forEach((el) => delete queryObj[el]);
+
+    //    advanced filter
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(
+      /\b(gte|gt|lte|lt|ne)\b/g,
+      (match) => `$${match}`
+    );
+    queryStr = JSON.parse(queryStr);
+    let query = Book.find(queryStr);
+
+    // fields (projection)
+    let fields = req.query.fields || "-__v";
+    fields = fields.split(",").join(" ");
+    console.log(fields, typeof fields);
+    query = query.select(fields);
+
+    // page
+    if (req.query.page) {
+      let page = +req.query.page;
+      let resPerPage = +req.query.limit || 2;
+      console.log(page, resPerPage);
+      query = query.limit(resPerPage).skip((page - 1) * resPerPage);
+    }
+
+    // sort
+    const sortBy = req.query.sort.split(",").join(" ") || { createdAt: -1 };
+    query = query.sort(sortBy);
+
+    // execute the query
+    const data = await query;
+
+    // send response
     res.status(200).json({
       status: "success",
       results: data.length,
