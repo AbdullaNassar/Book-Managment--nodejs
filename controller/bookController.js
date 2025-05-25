@@ -1,6 +1,13 @@
 const express = require("express");
 const Book = require("../models/bookModel");
 
+exports.getCheapest = function (req, res, next) {
+  req.query.sort = "price";
+  req.query.limit = 5;
+  req.query.page = 1;
+  next();
+};
+
 exports.getAllBooks = async function (req, res) {
   try {
     // filter
